@@ -147,6 +147,7 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:var(--ink);color
 .cl h1{font-family:var(--display);font-weight:900;font-size:140px;letter-spacing:.12em;line-height:.9}
 .cl h1 span{background:linear-gradient(180deg,#fffaf0,var(--gold2) 40%,var(--gold) 70%,#8f6a10);-webkit-background-clip:text;background-clip:text;color:transparent}
 .cl h2{font-family:var(--display);font-weight:800;font-size:54px;letter-spacing:.12em;color:#fff}
+.cl .one{font-family:var(--display);font-weight:800;font-size:30px;letter-spacing:.18em;color:var(--soft);text-transform:uppercase;margin-top:-10px}.cl .one b{display:inline-grid;place-items:center;width:44px;height:44px;border-radius:8px;background:var(--gold);color:#140f02;letter-spacing:0}
 .cl p{font-family:var(--display);font-weight:700;font-size:28px;letter-spacing:.3em;color:var(--soft);text-transform:uppercase}
 .cl .tro{position:absolute;width:150px;height:238px;background:url(assets/trophy.webp) center/contain no-repeat;opacity:.9;filter:drop-shadow(0 10px 20px rgba(0,0,0,.6))}
 </style>
@@ -216,7 +217,7 @@ function sceneHtml(seg){
   if(seg.kind === "next") return `<div class="title ${A("fade", 0, .6)}"><h1><span>UP NEXT</span></h1><p>${esc(D.nextLabel)}</p><div class="bar"></div></div>
       <div class="grid nx" style="top:${D.next.length > 6 ? 300 : 340}px">${D.next.slice(0, 8).map((n, i) => `<div class="mu ${A("up", .4 + i * .2, .6)}">${logo(n.away)}<div class="a"><b>${esc(n.away)}</b><small>${esc(T(n.away).rec)}</small></div><div class="at">@</div><div><b>${esc(n.home)}</b><small>${esc(T(n.home).rec)}</small></div>${logo(n.home)}
         <div class="meta">${n.day || n.time ? `<span>${esc([n.day, n.time && n.time + " ET"].filter(Boolean).join(" · "))}</span>` : ""}${n.line ? `<em>${esc(n.line)}</em>` : ""}</div></div>`).join("")}</div>`;
-  if(seg.kind === "close") return `<div class="cl"><div class="lg ${A("pop", .1, .8)}"></div><h1 class="${A("up", .5, .8)}"><span>BE V1P</span></h1><h2 class="${A("fade", 1, .7)}">v1phub.com</h2><p class="${A("fade", 1.4, .7)}">Box scores · Stats · Power rankings</p>
+  if(seg.kind === "close") return `<div class="cl"><div class="lg ${A("pop", .1, .8)}"></div><h1 class="${A("up", .5, .8)}"><span>BE V1P</span></h1><h2 class="${A("fade", 1, .7)}">v1phub.com</h2><div class="one ${A("fade", 1.25, .7)}">V · <b>1</b> · P &nbsp;—&nbsp; with the number one</div><p class="${A("fade", 1.4, .7)}">Box scores · Stats · Power rankings</p>
       <div class="tro ${A("left", .8, .9)}" style="left:260px;top:330px"></div><div class="tro ${A("right", .8, .9)}" style="right:260px;top:330px"></div></div>`;
   return "";
 }

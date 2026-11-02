@@ -20,6 +20,16 @@ const AZ_VOICE = env.AZURE_VOICE || "en-US-Andrew:DragonHDLatestNeural";   // sm
 const AZ_REGION = env.AZURE_SPEECH_REGION || "eastus";
 const xml = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 let azLast = 0;
+/* Say the brand the way the league does: "V1PGL" is "V-I-P-G-L", "V1P" is "V-I-P", but the website is "V, one, P hub" (captions and graphics keep the 1). */
+const BRAND = [[/v1phub/gi, "V, one, P hub"], [/V1PGL/gi, "VIPGL|"], [/V1P/gi, "VIP|"]];   // the website is spelled out with the number one so people type it right
+function brandSsml(text){   // escaped text with the brand spelled out as letters
+  let t = xml(text); BRAND.forEach(([re, sub]) => { t = t.replace(re, sub); });
+  return t.replace(/(VIPGL|VIP)\|/g, '<say-as interpret-as="characters">$1</say-as>');
+}
+function brandPlain(text){   // for voices without SSML: dotted letters
+  let t = String(text); BRAND.forEach(([re, sub]) => { t = t.replace(re, sub); });
+  return t.replace(/VIPGL\|/g, "V.I.P.G.L.").replace(/VIP\|/g, "V.I.P.").replace(/\.\.(?!\.)/g, ".");
+}
 const LEAD = 1.6, GAP = 0.7, TAIL = 2.2;   // seconds: intro sting before the first line, breath between segments, hold at the end
 
 fs.mkdirSync(OUT, { recursive: true });
@@ -43,7 +53,7 @@ async function tts(text, file, prev, next){
   for(let attempt = 1; attempt <= 3; attempt++){
     const r = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${VOICE}?output_format=mp3_44100_128`, {
       method: "POST", headers: { "xi-api-key": env.ELEVENLABS_API_KEY, "Content-Type": "application/json", Accept: "audio/mpeg" },
-      body: JSON.stringify({ text, model_id: MODEL, previous_text: prev || undefined, next_text: next || undefined,
+      body: JSON.stringify({ text: brandPlain(text), model_id: MODEL, previous_text: prev ? brandPlain(prev) : undefined, next_text: next ? brandPlain(next) : undefined,
         voice_settings: { stability: 0.55, similarity_boost: 0.8, style: 0.18, use_speaker_boost: true } }) });
     if(r.ok){ fs.writeFileSync(file, Buffer.from(await r.arrayBuffer())); return; }
     const msg = await r.text();
@@ -53,13 +63,16 @@ async function tts(text, file, prev, next){
 }
 /* Azure Speech (free F0 tier allows 20 requests a minute, so requests are spaced 3.3 seconds apart) */
 async function azureTts(text, file){
-  const ssml = `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xmlns:mstts="http://www.w3.org/2001/mstts" xml:lang="en-US"><voice name="${xml(AZ_VOICE)}">${xml(text)}</voice></speak>`;
+  let plain = false;
+  const ssmlFor = () => `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xmlns:mstts="http://www.w3.org/2001/mstts" xml:lang="en-US"><voice name="${xml(AZ_VOICE)}">${plain ? xml(brandPlain(text)) : brandSsml(text)}</voice></speak>`;
   for(let attempt = 1; attempt <= 5; attempt++){
+    const ssml = ssmlFor();
     const wait = azLast + 3300 - Date.now(); if(wait > 0) await new Promise(r => setTimeout(r, wait)); azLast = Date.now();
     const r = await fetch(`https://${AZ_REGION}.tts.speech.microsoft.com/cognitiveservices/v1`, { method: "POST",
       headers: { "Ocp-Apim-Subscription-Key": env.AZURE_SPEECH_KEY, "Content-Type": "application/ssml+xml", "X-Microsoft-OutputFormat": "audio-48khz-192kbitrate-mono-mp3", "User-Agent": "v1pgl-weekly" }, body: ssml });
     if(r.ok){ const buf = Buffer.from(await r.arrayBuffer()); if(buf.length > 1000){ fs.writeFileSync(file, buf); return; } }
     const msg = r.ok ? "empty audio" : await r.text();
+    if(r.status === 400 && !plain){ plain = true; log("  voice didn't take the letters tag; using dotted letters"); continue; }
     if(attempt === 5 || r.status === 401 || r.status === 403 || r.status === 400) throw new Error(`Azure Speech ${r.status}: ${String(msg).slice(0, 200) || "check AZURE_SPEECH_KEY / AZURE_SPEECH_REGION / AZURE_VOICE"}`);
     await new Promise(res => setTimeout(res, (r.status === 429 ? 15000 : 4000) * attempt));
   }
