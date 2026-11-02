@@ -1,0 +1,4 @@
+{
+  "_how": "Names the voices should say a certain way. ipa is the exact sound (used by Azure); say is a sound-it-out spelling used as a backup. Add more names the same way.",
+  "Jefe": { "ipa": "ˈhefe", "say": "Heh-feh" }
+}

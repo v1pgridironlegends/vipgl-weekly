@@ -1,6 +1,6 @@
-# V1PGL Weekly
+# The Final Whistle
 
-The weekly recap show for V1PGL. Two studio hosts, Davis and Ava, walk through every final (150–250 words a segment, with muted Twitch clips), the star performances, Players of the Week, milestones and records, the power rankings and next week's slate, over V1P broadcast graphics.
+V1PGL's weekly recap show. Two studio hosts, Trey Holloway and Nia Monroe (voiced by Azure's Davis and Ava HD voices), walk through every final (150–250 words a segment, with muted Twitch clips), the star performances, Players of the Week, milestones and records, the power rankings and next week's slate, over V1P broadcast graphics.
 
 **How it works:** Stat Desk → **Weekly video** → *Write script* → edit anything → *Make video*.
 GitHub then voices the script (Azure Speech, free tier), renders the graphics frame by frame, publishes the MP4 as a Release on this repo, and sends it back to the Stat Desk for you to watch. It only goes to Discord News when you click **Post to Discord**.
@@ -15,7 +15,7 @@ GitHub then voices the script (Azure Speech, free tier), renders the graphics fr
 - In the Azure portal, open your **Speech** resource and go to **Keys and Endpoint**.
 - Copy **KEY 1** and the **Region** (`eastus`).
 - The free tier (F0) covers 500,000 characters a month. A weekly show uses about 25,000–30,000.
-- It's a two-host desk: **Davis** (`en-US-Davis:DragonHDLatestNeural`) anchors and **Ava** (`en-US-Ava:DragonHDLatestNeural`) is the analyst. In the script, each line starts with `DAVIS:` or `AVA:`.
+- It's a two-host desk: **Davis** (`en-US-Davis:DragonHDLatestNeural`) anchors and **Ava** (`en-US-Ava:DragonHDLatestNeural`) is the analyst. In the script, each line starts with `TREY:` or `NIA:` (old `DAVIS:`/`AVA:` scripts still work).
   - To hear the options, go to the Actions tab → **Voice samples** → *Run workflow*. Download the **voice-samples** zip at the bottom of the run, which has Andrew, Andrew2, Davis, Brian and Steffan reading the same lines.
   - To switch voices, set the `AZURE_VOICE` (lead) or `AZURE_VOICE_2` (analyst) variable (step 3).
 - ElevenLabs still works: leave `AZURE_SPEECH_KEY` out and add `ELEVENLABS_API_KEY` instead.
@@ -53,8 +53,12 @@ Each game segment can show up to 3 Twitch clips from the v1psports channel, play
 - GitHub downloads the clips with yt-dlp while it renders. A clip that won't download is skipped, and that game uses graphics only.
 - Tip: put the team name in the clip title when you clip it on stream, so it lands on the right game.
 
+## Sound
+- `assets/sting.mp3` plays at the top of the show, `assets/whoosh.mp3` on every transition, and `assets/bed.mp3` under the open and the close (it loops as long as needed and dips under the hosts).
+- They're original sounds made by `sounds.py`. To use your own, upload files with the same names into `assets`.
+
 ## Running it by hand
-Actions tab → **V1PGL Weekly** → *Run workflow* → enter the week (e.g. `2`). You can also enter a voice for that run only.
+Actions tab → **The Final Whistle** → *Run workflow* → enter the week (e.g. `2`). You can also enter a voice for that run only.
 
 ## Testing locally
 `DRY_RUN=1 JOB_FILE=job.json node render.mjs` renders with timed silence instead of the voice.

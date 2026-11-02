@@ -1,4 +1,4 @@
-// V1PGL Weekly renderer: hub script → voice (Azure or ElevenLabs) → broadcast graphics → MP4.
+// The Final Whistle (V1PGL's weekly recap show) renderer: hub script → voice (Azure or ElevenLabs) → broadcast graphics → MP4.
 // Env: HUB_API, VIDEO_SECRET, WEEK (required for a real run)
 //      Voice, Azure (default when its key is set): AZURE_SPEECH_KEY, AZURE_SPEECH_REGION (eastus), AZURE_VOICE (en-US-Andrew:DragonHDLatestNeural)
 //      Voice, ElevenLabs: ELEVENLABS_API_KEY, ELEVEN_VOICE_ID · force one with VOICE_PROVIDER=azure|elevenlabs
@@ -16,12 +16,13 @@ const FPS = Number(env.FPS || 24);
 const VOICE = env.ELEVEN_VOICE_ID || "nPczCjzI2devNBz1zQrb";   // "Brian": deep, smooth, warm narrator (change in repo Variables)
 const MODEL = env.ELEVEN_MODEL || "eleven_multilingual_v2";
 const PROVIDER = env.VOICE_PROVIDER || (env.AZURE_SPEECH_KEY ? "azure" : "elevenlabs");
-const AZ_VOICE = env.AZURE_VOICE || "en-US-Davis:DragonHDLatestNeural";     // the lead anchor (DAVIS: lines)
-const AZ_VOICE_2 = env.AZURE_VOICE_2 || "en-US-Ava:DragonHDLatestNeural";    // the analyst (AVA: lines)
-const HOSTS = (env.HOST_NAMES || "Davis,Ava").split(",").map(x => x.trim().toUpperCase());
-/* A segment is one turn per line: "DAVIS: ..." / "AVA: ...". Lines without a name go to the lead. */
+const AZ_VOICE = env.AZURE_VOICE || "en-US-Davis:DragonHDLatestNeural";     // Trey Holloway, the lead anchor (TREY: lines)
+const AZ_VOICE_2 = env.AZURE_VOICE_2 || "en-US-Ava:DragonHDLatestNeural";    // Nia Monroe, the analyst (NIA: lines)
+const HOSTS = (env.HOST_NAMES || "Trey,Nia").split(",").map(x => x.trim().toUpperCase());
+const HOST_ALIAS = { DAVIS: HOSTS[0], AVA: HOSTS[1] };   // scripts written before the rename still work
+/* A segment is one turn per line: "TREY: ..." / "NIA: ...". Lines without a name go to the lead. */
 const turns = text => String(text || "").split(/\n+/).map(l => l.trim()).filter(Boolean).map(l => {
-  const m = l.match(/^([A-Za-z]+)\s*:\s*(.+)$/); const who = m ? m[1].toUpperCase() : "";
+  const m = l.match(/^([A-Za-z]+)\s*:\s*(.+)$/); let who = m ? m[1].toUpperCase() : ""; who = HOST_ALIAS[who] || who;
   return HOSTS.includes(who) ? { host: who, text: m[2] } : { host: HOSTS[0], text: l }; });
 const spoken = text => turns(text).map(t => t.text).join(" ");
 const AZ_REGION = env.AZURE_SPEECH_REGION || "eastus";
@@ -29,15 +30,26 @@ const xml = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(
 let azLast = 0;
 /* Say the brand the way the league does: "V1PGL" is "V-I-P-G-L", "V1P" is "V-I-P", but the website is "V, one, P hub" (captions and graphics keep the 1). */
 const BRAND = [[/v1phub/gi, "V, one, P hub"], [/V1PGL/gi, "VIPGL|"], [/V1P/gi, "VIP|"]];   // the website is spelled out with the number one so people type it right
+/* Team records the way broadcasters say them: "3-0" is "3 and oh", "2-1-1" is "2, 1 and 1" (scores are written "24 to 17", so they don't match) */
+const records = text => String(text).replace(/\b(\d{1,2})-(\d{1,2})(?:-(\d{1,2}))?\b(?![-\d])/g, (m, w, l, tie) => {
+  if(+w > 20 || +l > 20 || (tie && +tie > 5)) return m; const say = n => n === "0" ? "oh" : n;
+  return tie ? `${say(w)}, ${say(l)} and ${say(tie)}` : `${say(w)} and ${say(l)}`; });
+/* pronounce.json: names said a certain way (e.g. Jefe = "HEH-feh", the Spanish word for chief) */
+let SAY = [];
+try{ const pj = JSON.parse(fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), "pronounce.json"), "utf8"));
+  SAY = Object.keys(pj).filter(k => !k.startsWith("_") && pj[k]).map(k => ({ re: new RegExp("\\b" + k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\b", "gi"), ipa: pj[k].ipa || "", say: pj[k].say || k })); }
+catch(e){ console.log("pronounce.json not loaded: " + e.message); }
 function brandSsml(text){   // escaped text with the brand spelled out as letters
-  let t = xml(text); BRAND.forEach(([re, sub]) => { t = t.replace(re, sub); });
+  let t = xml(records(text));
+  SAY.forEach(w => { t = t.replace(w.re, m => w.ipa ? `<phoneme alphabet="ipa" ph="${xml(w.ipa)}">${m}</phoneme>` : xml(w.say)); }); BRAND.forEach(([re, sub]) => { t = t.replace(re, sub); });
   return t.replace(/(VIPGL|VIP)\|/g, '<say-as interpret-as="characters">$1</say-as>');
 }
 function brandPlain(text){   // for voices without SSML: dotted letters
-  let t = String(text); BRAND.forEach(([re, sub]) => { t = t.replace(re, sub); });
+  let t = records(text);
+  SAY.forEach(w => { t = t.replace(w.re, w.say); }); BRAND.forEach(([re, sub]) => { t = t.replace(re, sub); });
   return t.replace(/VIPGL\|/g, "V.I.P.G.L.").replace(/VIP\|/g, "V.I.P.").replace(/\.\.(?!\.)/g, ".");
 }
-const LEAD = 1.6, GAP = 0.7, TAIL = 2.2;
+const LEAD = 3.0, GAP = 0.9, TAIL = 4.5;   // the intro sting plays before the first line; the close music rides out the tail
 /* Twitch clips play inside this box on game segments (the graphics draw the frame around it). They are always muted. */
 const CLIP_BOX = { x: 96, y: 168, w: 1152, h: 648 }, CLIP_MAX = 14, CLIP_MIN = 4;
 async function getClip(c, i){
@@ -150,15 +162,28 @@ async function main(){
   });
   if(clipJobs.length) log(`clips placed: ${clipJobs.length}`);
 
-  // 3. the soundtrack: lead-in silence, each line at its start time
-  const inputs = [], filters = [];
-  timeline.forEach((s, i) => { inputs.push("-i", s.file); filters.push(`[${i}:a]adelay=${Math.round(s.speechStart * 1000)}|${Math.round(s.speechStart * 1000)},aresample=48000,aformat=channel_layouts=stereo[a${i}]`); });
+  // 3. the soundtrack: the hosts, the intro sting, a whoosh on every transition, and music under the open and the close
+  //    (assets/sting.mp3, whoosh.mp3 and bed.mp3; swap in your own files with the same names any time)
+  const inputs = [], filters = [], mixIn = [], ms = x => Math.max(0, Math.round(x * 1000)), A = f => path.join(here, "assets", f);
+  const add = (file, chain, loop) => { const k = inputs.filter(x => x === "-i").length; if(loop) inputs.push("-stream_loop", "-1"); inputs.push("-i", file);
+    filters.push(`[${k}:a]aresample=48000,aformat=channel_layouts=stereo,${chain}[m${k}]`); mixIn.push(`[m${k}]`); };
+  timeline.forEach(s => add(s.file, `adelay=${ms(s.speechStart)}:all=1`));
+  if(fs.existsSync(A("sting.mp3"))) add(A("sting.mp3"), "volume=0.8");
+  if(fs.existsSync(A("whoosh.mp3"))) timeline.slice(1).forEach(s => add(A("whoosh.mp3"), `volume=0.5,adelay=${ms(s.start - 0.45)}:all=1`));
+  if(fs.existsSync(A("bed.mp3")) && timeline.length > 1){
+    const open = timeline[0], openEnd = timeline[1].start + 0.6, close = timeline[timeline.length - 1];
+    // open: up front with the sting, down under the hosts, out at the first transition
+    add(A("bed.mp3"), `atrim=0:${(openEnd - 0.5).toFixed(2)},asetpts=PTS-STARTPTS,volume='if(lt(t,${(open.speechStart - 0.3).toFixed(2)}),0.32,0.11)':eval=frame,afade=t=in:d=0.6,afade=t=out:st=${(openEnd - 2).toFixed(2)}:d=1.5,adelay=500:all=1`, true);
+    // close: in under the sign-off, back up once they finish, out at the very end
+    const cs = close.start, cl = total - cs, talkEnd = close.speechStart + close.speechDur - cs;
+    add(A("bed.mp3"), `atrim=0:${cl.toFixed(2)},asetpts=PTS-STARTPTS,volume='if(lt(t,${talkEnd.toFixed(2)}),0.11,0.32)':eval=frame,afade=t=in:d=1.2,afade=t=out:st=${Math.max(0, cl - 2.5).toFixed(2)}:d=2.5,adelay=${ms(cs)}:all=1`, true);
+  }
   const audio = path.join(OUT, "voice.m4a");
-  ff([...inputs, "-filter_complex", filters.join(";") + ";" + timeline.map((_, i) => `[a${i}]`).join("") + `amix=inputs=${timeline.length}:normalize=0,apad=whole_dur=${total.toFixed(2)},loudnorm=I=-16:TP=-1.5:LRA=11[out]`,
+  ff([...inputs, "-filter_complex", filters.join(";") + ";" + mixIn.join("") + `amix=inputs=${mixIn.length}:normalize=0:duration=longest,apad=whole_dur=${total.toFixed(2)},loudnorm=I=-16:TP=-1.5:LRA=11[out]`,
     "-map", "[out]", "-t", total.toFixed(2), "-c:a", "aac", "-b:a", "192k", audio]);
 
   // 4. the picture: every frame rendered at an exact time, piped straight into the encoder
-  const name = `V1PGL-Weekly-${job.digest.season}-${job.digest.label.replace(/\s+/g, "-")}.mp4`;
+  const name = `The-Final-Whistle-${job.digest.season}-${job.digest.label.replace(/\s+/g, "-")}.mp4`;
   const mp4 = path.join(OUT, name);
   // clips go into the box drawn by the graphics, video only (no audio is ever taken from them), with a quick fade in and out
   const B = CLIP_BOX, clipIn = [], fc = [];
@@ -177,7 +202,7 @@ async function main(){
   const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
   page.on("pageerror", e => log("page error:", e.message));
   await page.goto(pathToFileURL(path.join(here, "broadcast.html")).href, { waitUntil: "networkidle" });
-  const info = await page.evaluate(show => window.init(show), { digest: job.digest, timeline: timeline.map(({ file, clipFiles, clips, ...s }) => s), total, clipBox: CLIP_BOX });
+  const info = await page.evaluate(show => window.init(show), { digest: job.digest, timeline: timeline.map(({ file, clipFiles, clips, ...s }) => s), total, clipBox: CLIP_BOX, hosts: HOSTS });
   log(`graphics ready: ${info.scenes} scenes, ${info.images} images`);
   const frames = Math.ceil(total * FPS);
   for(let f = 0; f < frames; f++){
