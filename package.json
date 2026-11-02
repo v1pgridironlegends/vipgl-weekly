@@ -1,0 +1,8 @@
+{
+  "name": "v1pgl-weekly",
+  "private": true,
+  "type": "module",
+  "description": "Renders the V1PGL Weekly recap show from the V1P Hub.",
+  "scripts": { "render": "node render.mjs" },
+  "dependencies": { "playwright": "1.47.2" }
+}
