@@ -191,6 +191,8 @@ async function main(){
   ff(["-ss", Math.min(LEAD + 1.2, total / 2).toFixed(2), "-i", mp4, "-frames:v", "1", "-q:v", "3", path.join(OUT, "thumb.jpg")]);
   const size = (fs.statSync(mp4).size / 1048576).toFixed(1);
   log(`done: ${name} · ${total.toFixed(1)}s · ${size} MB`);
-  fs.writeFileSync(path.join(OUT, "env"), `VIDEO_FILE=${mp4}\nVIDEO_NAME=${name}\nSEASON=${job.digest.season}\nLABEL=${job.digest.label}\nVIDEO_SECONDS=${Math.round(total)}\n`);
+  // quoted, because the publish step loads this file into bash ("Week 1" has a space)
+  const q = v => "'" + String(v).replace(/'/g, "'\\''") + "'";
+  fs.writeFileSync(path.join(OUT, "env"), `VIDEO_FILE=${q(mp4)}\nVIDEO_NAME=${q(name)}\nSEASON=${q(job.digest.season)}\nLABEL=${q(job.digest.label)}\nVIDEO_SECONDS=${Math.round(total)}\n`);
 }
 main().catch(e => { console.error(e); fs.writeFileSync(path.join(OUT, "error.txt"), String(e.message || e)); process.exit(1); });
