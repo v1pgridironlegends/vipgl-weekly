@@ -1,0 +1,27 @@
+name: Voice samples
+
+on:
+  workflow_dispatch:
+    inputs:
+      voices:
+        description: "Optional: comma-separated Azure voices (leave blank for Andrew, Andrew2, Davis, Brian, Steffan)"
+        required: false
+
+jobs:
+  samples:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Read the lines in each voice
+        env:
+          AZURE_SPEECH_KEY: ${{ secrets.AZURE_SPEECH_KEY }}
+          AZURE_SPEECH_REGION: ${{ vars.AZURE_SPEECH_REGION || 'eastus' }}
+          VOICES: ${{ inputs.voices }}
+        run: node samples.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: voice-samples
+          path: out/samples/
