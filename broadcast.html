@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>V1PGL Weekly</title>
+<title>The Final Whistle</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Barlow:wght@500;600;700&display=swap">
 <style>
-/* V1PGL Weekly broadcast package, 1920x1080. Everything is driven by seek(t) so every frame renders the same way every time. */
+/* The Final Whistle broadcast package (V1PGL weekly recap show), 1920x1080. Everything is driven by seek(t) so every frame renders the same way every time. */
 :root{--gold:#d4a72c;--gold2:#f3d27a;--ink:#07070a;--panel:rgba(16,16,20,.82);--line:rgba(255,255,255,.1);--fg:#fff;--soft:#d6d6dc;
   --display:"Barlow Condensed","Arial Narrow",sans-serif;--body:"Barlow",Arial,sans-serif}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -38,7 +38,7 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:var(--ink);color
 .ticker .it{display:inline-flex;align-items:center;gap:12px;padding:0 34px;font-family:var(--display);font-weight:700;font-size:28px;letter-spacing:.06em;text-transform:uppercase;color:#e9e9ee;border-right:1px solid rgba(255,255,255,.12)}
 .ticker .it img{width:36px;height:36px;object-fit:contain}
 .ticker .it b{color:#fff;font-weight:900}.ticker .it .w{color:var(--gold2)}
-.cap{position:absolute;left:50%;bottom:92px;z-index:19;transform:translateX(-50%);max-width:1500px;padding:12px 26px;border-radius:10px;background:rgba(0,0,0,.72);border:1px solid rgba(255,255,255,.08);
+.cap{position:absolute;left:50%;bottom:92px;z-index:19;transform:translateX(-50%);width:max-content;max-width:1700px;padding:12px 26px;border-radius:10px;background:rgba(0,0,0,.72);border:1px solid rgba(255,255,255,.08);
   font-family:var(--body);font-weight:600;font-size:34px;line-height:1.3;text-align:center;color:#fff;text-shadow:0 2px 4px rgba(0,0,0,.6)}
 .cap:empty{display:none}
 .cap .who{display:inline-block;margin-right:14px;padding:2px 12px;border-radius:6px;font-style:normal;font-family:var(--display);font-weight:900;font-size:24px;letter-spacing:.16em;vertical-align:4px}
@@ -46,6 +46,7 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:var(--ink);color
 
 /* ---- scenes ---- */
 .scene{position:absolute;inset:0;opacity:0;z-index:10}
+.sc-main{position:absolute;inset:0}
 .anim{animation-fill-mode:both;animation-play-state:paused}
 @keyframes up{from{opacity:0;transform:translateY(60px)}to{opacity:1;transform:none}}
 @keyframes left{from{opacity:0;transform:translateX(-120px)}to{opacity:1;transform:none}}
@@ -65,9 +66,10 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:var(--ink);color
 /* open */
 .op{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding-bottom:60px}
 .op .lg{width:340px;height:333px;background:url(assets/logo.webp) center/contain no-repeat;filter:drop-shadow(0 0 40px rgba(212,167,44,.45))}
-.op h1{font-family:var(--display);font-weight:900;font-size:150px;letter-spacing:.08em;line-height:.9;position:relative;overflow:hidden;padding:0 20px}
+.op h1{font-family:var(--display);font-weight:900;font-size:132px;letter-spacing:.06em;line-height:.9;position:relative;overflow:hidden;padding:0 20px}
 .op h1 span{background:linear-gradient(180deg,#fffaf0,var(--gold2) 40%,var(--gold) 70%,#8f6a10);-webkit-background-clip:text;background-clip:text;color:transparent}
 .op h1::after{content:"";position:absolute;top:0;bottom:0;left:0;width:30%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);animation:glint 1.4s ease-in-out both;animation-delay:1.6s;animation-play-state:paused}
+.op .op-k{font-family:var(--display);font-weight:800;font-size:30px;letter-spacing:.5em;color:var(--soft);margin-bottom:-8px}
 .op h2{font-family:var(--display);font-weight:700;font-size:40px;letter-spacing:.42em;color:#fff;text-transform:uppercase}
 .op .pill{font-family:var(--display);font-weight:800;font-size:28px;letter-spacing:.2em;padding:8px 26px;border-radius:40px;border:2px solid var(--gold);color:var(--gold2);text-transform:uppercase}
 
@@ -105,6 +107,10 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:var(--ink);color
 
 /* forced wins: results grid + top three performers */
 .fwg{gap:14px}
+.card.fw.xs{padding:8px 14px;gap:10px;min-width:0}.card.fw.xs > div:not(.big){min-width:0}.card.fw.xs img{width:44px;height:44px}.card.fw.xs b{font-size:25px;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.card.fw.xs p{font-size:17px;white-space:nowrap}.card.fw.xs .big{font-size:32px;white-space:nowrap}
+.fwbox .fwg:has(.xs){gap:10px}
+.fwbox{position:absolute;left:150px;right:150px;top:322px;display:flex;flex-direction:column;gap:26px}
+.fwbox > .grid,.fwbox > .stars{position:static;left:auto;right:auto;top:auto;bottom:auto}
 .card.fw.sm{padding:12px 22px}.card.fw.sm img{width:60px;height:60px}.card.fw.sm b{font-size:32px}.card.fw.sm p{font-size:22px}.card.fw.sm .big{font-size:44px}
 .fws .star{padding:14px 20px;gap:16px}.fws .star img{width:64px;height:64px}.fws .star b{font-size:36px}.fws .star p{font-size:22px}
 /* potw */
@@ -119,6 +125,21 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:var(--ink);color
 .pc .tmn img{width:46px;height:46px;object-fit:contain}
 .pc p{margin-top:16px;font-size:27px;line-height:1.35;color:#fff;font-weight:600}
 .pc .res{display:inline-block;margin-top:12px;font-family:var(--display);font-weight:800;font-size:24px;letter-spacing:.14em;padding:4px 12px;border-radius:6px;background:rgba(255,255,255,.08)}
+
+/* players of the week by conference */
+.title.sm{top:124px}.title.sm h1{font-size:74px}.title.sm p{font-size:24px;margin-top:6px}
+.pg4{position:absolute;left:110px;right:110px;top:268px;display:grid;gap:40px}
+.pgc{display:flex;flex-direction:column;gap:8px;min-width:0}
+.pgc h3 img{width:44px;height:44px;object-fit:contain;filter:drop-shadow(0 0 10px rgba(212,167,44,.35))}
+.pgc h3{display:flex;align-items:center;gap:14px;font-family:var(--display);font-weight:900;font-size:30px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold2);padding-bottom:6px;border-bottom:2px solid rgba(212,167,44,.45)}
+.pr4{display:grid;grid-template-columns:96px minmax(0,1fr);gap:18px;align-items:center;padding:8px 18px 8px 8px;border-radius:14px;background:var(--panel);border:1px solid var(--line);border-left:8px solid var(--tc,var(--gold));min-height:104px}
+.pr4 .pf{width:96px;height:88px;border-radius:10px;object-fit:cover;object-position:50% 15%}
+.pr4 .pl{width:96px;height:88px;display:grid;place-items:center}.pr4 .pl img,.pr4 .pl .ph{width:72px;height:72px;object-fit:contain;font-size:34px}
+.pr4 .k{font-family:var(--display);font-weight:800;font-size:16px;letter-spacing:.24em;color:var(--gold2)}
+.pr4 b{display:block;font-family:var(--display);font-weight:900;font-size:34px;line-height:1;text-transform:uppercase;margin:1px 0 3px}
+.pr4 .tmn{display:flex;align-items:center;gap:8px;font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:.04em;color:var(--soft);text-transform:uppercase}
+.pr4 .tmn img{width:30px;height:30px;object-fit:contain}.pr4 .tmn em{font-style:normal;color:#fff}
+.pr4 p{font-size:20px;color:#fff;font-weight:600;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* rankings */
 .rk{position:absolute;left:300px;right:300px;top:300px;display:flex;flex-direction:column;gap:12px}
@@ -184,6 +205,25 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:var(--ink);color
 /* list scenes: a soft spotlight walks through the cards while the hosts talk */
 .spot{scale:calc(1 + .025 * var(--hot,0));box-shadow:0 0 0 calc(3px * var(--hot,0)) rgba(243,210,122,.9),0 0 calc(40px * var(--hot,0)) rgba(243,210,122,calc(.35 * var(--hot,0)))}
 
+/* transitions: a V1P wipe sweeps across between segments; the cut happens underneath it */
+#wipe{position:absolute;inset:0;z-index:16;pointer-events:none;overflow:hidden;visibility:hidden}
+#wipe .wp{position:absolute;top:-60px;bottom:-60px;left:0;width:2900px;transform:skewX(-16deg);background:linear-gradient(90deg,#0b0b0e,#17140b 50%,#0b0b0e);
+  border-left:46px solid var(--gold);border-right:46px solid var(--gold);box-shadow:-30px 0 60px rgba(212,167,44,.35),30px 0 60px rgba(212,167,44,.35)}
+#wipe .wp::before,#wipe .wp::after{content:"";position:absolute;top:0;bottom:0;width:14px;background:var(--gold2)}
+#wipe .wp::before{left:30px}#wipe .wp::after{right:30px}
+#wipe .wl{position:absolute;left:50%;top:50%;width:300px;height:294px;margin:-147px 0 0 -150px;background:url(assets/logo.webp) center/contain no-repeat;filter:drop-shadow(0 0 30px rgba(212,167,44,.5))}
+
+/* intro and outro: the show art, full screen */
+.hero{position:absolute;inset:0;overflow:hidden;background:#000}
+.hero-img{position:absolute;inset:0;background:url(assets/show.jpg) center/cover no-repeat}
+@keyframes heroIn{from{opacity:0;transform:scale(1.08)}to{opacity:1;transform:scale(1)}}
+.hero-glint{position:absolute;top:0;bottom:0;left:0;width:22%;background:linear-gradient(90deg,transparent,rgba(255,240,200,.28),transparent);mix-blend-mode:screen}
+.hero-tag{position:absolute;left:0;right:0;margin:0 auto;width:fit-content;top:668px;display:flex;align-items:center;gap:18px;padding:8px 24px;border-radius:40px;background:rgba(0,0,0,.72);border:2px solid var(--gold);white-space:nowrap;box-shadow:0 10px 30px rgba(0,0,0,.6)}
+.hero-tag b{font-family:var(--display);font-weight:900;font-size:28px;letter-spacing:.14em;color:var(--gold2);text-transform:uppercase}
+.hero-tag span{font-family:var(--display);font-weight:700;font-size:24px;letter-spacing:.12em;color:#fff;text-transform:uppercase}
+.hero-tag.end{flex-direction:column;gap:2px;border-radius:16px;padding:10px 30px}.hero-tag.end b{text-transform:none;letter-spacing:.08em}
+.hero-tag i{font-style:normal;display:inline-grid;place-items:center;width:30px;height:30px;border-radius:6px;background:var(--gold);color:#140f02;letter-spacing:0}
+
 /* close */
 .cl{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding-bottom:80px}
 .cl .lg{width:300px;height:294px;background:url(assets/logo.webp) center/contain no-repeat;filter:drop-shadow(0 0 40px rgba(212,167,44,.45))}
@@ -199,7 +239,8 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:var(--ink);color
 <div id="stage">
   <div class="bg"><div class="bg-glow g-anim"></div><div class="bg-sweep g-anim"></div><div class="bg-mark"></div></div>
   <div id="scenes"></div>
-  <div class="bug"><i></i><div><b>V1PGL WEEKLY</b><small id="bugSub"></small></div></div>
+  <div id="wipe"><div class="wp"></div><div class="wl"></div></div>
+  <div class="bug"><i></i><div><b>THE FINAL WHISTLE</b><small id="bugSub"></small></div></div>
   <div class="live"><em>RECAP</em><span id="liveSub"></span></div>
   <div class="cap" id="cap"></div>
   <div class="ticker"><div class="tag">FINALS</div><div class="rail"><div class="run g-anim" id="run"></div></div></div>
@@ -215,14 +256,15 @@ const tc = name => `--tc:${T(name).color}`;
 
 function sceneHtml(seg){
   const D = SHOW.digest;
-  if(seg.kind === "open") return `<div class="op"><div class="lg ${A("spinIn", .1, 1.1)}"></div>
-      <h1 class="${A("up", .7, .8)}"><span>V1PGL WEEKLY</span></h1>
-      <h2 class="${A("fade", 1.2, .8)}">${esc(D.season)} · ${esc(D.label)}</h2>
-      <div class="pill ${A("pop", 1.7, .6)}">${D.finals.length} game${D.finals.length === 1 ? "" : "s"} · ${D.forced.length} forced win${D.forced.length === 1 ? "" : "s"}</div></div>`;
+  if(seg.kind === "open") return `<div class="hero"><img src="assets/show.jpg" alt="" style="display:none"><div class="hero-img ${A("heroIn", 0, 1.6)}"></div><div class="hero-glint ${A("glint", 1.2, 1.6)}"></div>
+      <div class="hero-tag ${A("pop", 1.6, .6)}"><b>${esc(D.season)} · ${esc(D.label)}</b><span>${D.finals.length} game${D.finals.length === 1 ? "" : "s"} · ${D.forced.length} forced win${D.forced.length === 1 ? "" : "s"}</span></div></div>`;
   if(seg.kind === "game"){
     const f = D.finals.find(x => x.id === seg.game); if(!f) return "";
     const aw = f.awayScore > f.homeScore, hw = f.homeScore > f.awayScore;
     const team = (n, win, side, d) => `<div class="tm ${win ? "" : "lose"} ${A(side, d, .8)}" style="${tc(n)}">${logo(n, "lg")}<h3>${esc(T(n).full)}</h3><div class="rec">${esc(T(n).rec)}</div><div class="stripe"></div></div>`;
+    if(f.quarters){ const z = v => v === "" || v == null || isNaN(Number(v)) ? 0 : Number(v), n = Math.max(f.quarters.away.length, f.quarters.home.length);
+      const keep = [...Array(n).keys()].filter(i => i < 4 || [f.quarters.away[i], f.quarters.home[i]].some(v => v !== "" && v != null && Number(v) > 0));
+      f.quarters = { away: keep.map(i => z(f.quarters.away[i])), home: keep.map(i => z(f.quarters.home[i])) }; }
     const q = f.quarters ? `<table class="qt ${A("fade", 1.4, .6)}"><tr><th></th>${f.quarters.away.map((_, i) => `<th>${i < 4 ? "Q" + (i + 1) : "OT"}</th>`).join("")}<th>T</th></tr>
         <tr><td>${esc(f.away)}</td>${f.quarters.away.map(v => `<td>${esc(v)}</td>`).join("")}<td class="t">${f.awayScore}</td></tr>
         <tr><td>${esc(f.home)}</td>${f.quarters.home.map(v => `<td>${esc(v)}</td>`).join("")}<td class="t">${f.homeScore}</td></tr></table>` : "";
@@ -255,12 +297,22 @@ function sceneHtml(seg){
     return board + stats + leaders + clips;
   }
   if(seg.kind === "forced"){
-    const F = D.forced, stars = D.forcedStars || [], cols = F.length > 2 ? 2 : 1, compact = F.length > 4;
-    const res = F.map((x, i) => `<div class="card fw ${compact ? "sm" : ""} ${A("left", .4 + i * .15, .6)}" style="${tc(x.team)}">${logo(x.team)}<div><b>${esc(T(x.team).full)}</b><p>${x.reserve ? "vs the " + esc(x.oppFull) : "Forced win"}</p></div><div class="big">${x.us}–${x.them}</div></div>`).join("");
+    // columns grow with the week: 1–2 games one column, up to 8 two, 9+ three; the scene then shrinks to fit if it must
+    const F = D.forced, stars = D.forcedStars || [], cols = F.length > 8 ? 3 : F.length > 2 ? 2 : 1, compact = F.length > 4, tiny = F.length > 8;
+    const res = F.map((x, i) => `<div class="card fw ${compact ? "sm" : ""} ${tiny ? "xs" : ""} ${A("left", .4 + Math.min(i, 12) * .12, .6)}" style="${tc(x.team)}">${logo(x.team)}<div><b>${esc(tiny ? x.team : T(x.team).full)}</b><p>${x.reserve ? (tiny ? "vs " + esc(x.opp) : "vs the " + esc(x.oppFull)) : "Forced win"}</p></div><div class="big">${x.us}–${x.them}</div></div>`).join("");
     const st = stars.map((p, i) => `<div class="star ${A("up", 1.2 + F.length * .15 + i * .3, .7)}" style="${tc(p.team)}">${T(p.team).logo ? `<img src="${esc(T(p.team).logo)}" alt="">` : ""}<div><div class="k">${i === 0 ? "TOP PERFORMER" : "STANDOUT"}</div><b>${esc(p.player)}</b><p>${esc(p.line)}</p></div></div>`).join("");
     return `<div class="title ${A("fade", 0, .6)}"><h1><span>FORCED WINS</span></h1><p>Around the rest of the league</p><div class="bar"></div></div>
-      <div class="grid fwg" style="grid-template-columns:repeat(${cols},1fr);top:${stars.length ? 322 : 340}px">${res}</div>
-      ${st ? `<div class="stars fws" style="grid-template-columns:repeat(${stars.length},1fr)">${st}</div>` : ""}`;
+      <div class="fwbox"><div class="grid fwg" style="grid-template-columns:repeat(${cols},minmax(0,1fr))">${res}</div>
+      ${st ? `<div class="stars fws" style="grid-template-columns:repeat(${stars.length},minmax(0,1fr))">${st}</div>` : ""}</div>`;
+  }
+  if(seg.kind === "potw" && D.potw && (D.potw.groups || []).some(g => g.conf !== "League")){   // 2 offense + 2 defense per conference
+    const P = D.potw, G = P.groups.filter(g => g.off.length || g.def.length);
+    const row = (c, k, d) => `<div class="pr4 ${A("up", d, .6)}" style="${tc(c.team)}">${c.photo ? `<img class="pf" src="${esc(c.photo)}" alt="">` : `<div class="pl">${logo(c.team)}</div>`}
+        <div class="pt"><div class="k">${k}</div><b>${esc(c.player)}</b><div class="tmn">${T(c.team).logo ? `<img src="${esc(T(c.team).logo)}" alt="">` : ""}${esc(T(c.team).full)}${c.result ? ` · <em>${esc(c.result)}</em>` : ""}</div><p>${esc(c.line)}</p></div></div>`;
+    let n = 0;
+    return `<div class="title sm ${A("fade", 0, .6)}"><h1><span>${P.official ? "PLAYERS OF THE WEEK" : "TOP PERFORMERS"}</span></h1><p>${esc(D.label)} · 2 offense, 2 defense per conference</p></div>
+      <div class="pg4" style="grid-template-columns:repeat(${G.length},1fr)">${G.map((g, gi) => `<div class="pgc"><h3 class="${A(gi ? "right" : "left", .3, .6)}">${/^(alpha|omega)$/i.test(g.conf) ? `<img src="assets/${g.conf.toLowerCase()}.png" alt="">` : ""}${esc(g.conf)} Conference</h3>
+        ${g.off.map(c => row(c, "OFFENSE", .5 + (n++) * .18)).join("")}${g.def.map(c => row(c, "DEFENSE", .5 + (n++) * .18)).join("")}</div>`).join("")}</div>`;
   }
   if(seg.kind === "potw"){
     const P = D.potw, card = (c, k, d) => !c ? "" : `<div class="pc ${A("up", d, .8)}" style="${tc(c.team)}">${c.photo ? `<img class="ph" src="${esc(c.photo)}" alt="">` : `<div class="phl">${logo(c.team)}</div>`}
@@ -282,8 +334,8 @@ function sceneHtml(seg){
   if(seg.kind === "next") return `<div class="title ${A("fade", 0, .6)}"><h1><span>UP NEXT</span></h1><p>${esc(D.nextLabel)}</p><div class="bar"></div></div>
       <div class="grid nx" style="top:${D.next.length > 6 ? 300 : 340}px">${D.next.slice(0, 8).map((n, i) => `<div class="mu ${A("up", .4 + i * .2, .6)}">${logo(n.away)}<div class="a"><b>${esc(n.away)}</b><small>${esc(T(n.away).rec)}</small></div><div class="at">@</div><div><b>${esc(n.home)}</b><small>${esc(T(n.home).rec)}</small></div>${logo(n.home)}
         <div class="meta">${n.day || n.time ? `<span>${esc([n.day, n.time && n.time + " ET"].filter(Boolean).join(" · "))}</span>` : ""}${n.line ? `<em>${esc(n.line)}</em>` : ""}</div></div>`).join("")}</div>`;
-  if(seg.kind === "close") return `<div class="cl"><div class="lg ${A("pop", .1, .8)}"></div><h1 class="${A("up", .5, .8)}"><span>BE V1P</span></h1><h2 class="${A("fade", 1, .7)}">v1phub.com</h2><div class="one ${A("fade", 1.25, .7)}">V · <b>1</b> · P &nbsp;—&nbsp; with the number one</div><p class="${A("fade", 1.4, .7)}">Box scores · Stats · Power rankings</p>
-      <div class="tro ${A("left", .8, .9)}" style="left:260px;top:330px"></div><div class="tro ${A("right", .8, .9)}" style="right:260px;top:330px"></div></div>`;
+  if(seg.kind === "close") return `<div class="hero"><div class="hero-img ${A("heroIn", 0, 1.2)}"></div>
+      <div class="hero-tag end ${A("pop", .6, .6)}"><b>BE V1P · v1phub.com</b><span>V · <i>1</i> · P &nbsp;—&nbsp; spelled with the number one</span></div></div>`;
   return "";
 }
 
@@ -292,7 +344,7 @@ function buildCaps(seg){
   const turns = seg.turns && seg.turns.length ? seg.turns : [{ host: "", text: seg.text || "" }];
   const chunks = [];
   turns.forEach(tn => { const parts = (tn.text || "").match(/[^.!?]+[.!?]+["”’]?|[^.!?]+$/g) || [];
-    parts.forEach(p => { p = p.trim(); if(!p) return; if(p.length <= 110) chunks.push({ who: tn.host, t: p }); else { let cur = ""; p.split(/\s+/).forEach(x => { if((cur + " " + x).trim().length > 100){ chunks.push({ who: tn.host, t: cur.trim() }); cur = x; } else cur += " " + x; }); if(cur.trim()) chunks.push({ who: tn.host, t: cur.trim() }); } }); });
+    parts.forEach(p => { p = p.trim(); if(!p) return; if(p.length <= 54) chunks.push({ who: tn.host, t: p }); else { let cur = ""; p.split(/\s+/).forEach(x => { if((cur + " " + x).trim().length > 50){ chunks.push({ who: tn.host, t: cur.trim() }); cur = x; } else cur += " " + x; }); if(cur.trim()) chunks.push({ who: tn.host, t: cur.trim() }); } }); });
   const total = chunks.reduce((a, c) => a + c.t.length + 8, 0) || 1; let t = seg.speechStart;
   chunks.forEach(c => { const d = seg.speechDur * (c.t.length + 8) / total; CAPS.push({ s: t, e: t + d, text: c.t, who: c.who }); t += d; });
 }
@@ -309,15 +361,19 @@ async function init(show){
   run.style.animationDuration = Math.max(20, (D.finals.length + D.forced.length) * 6) + "s";
   const host = document.getElementById("scenes");
   show.timeline.forEach(seg => { const el = document.createElement("div"); el.className = "scene"; el.innerHTML = sceneHtml(seg); host.appendChild(el);
+    if(!["open", "close", "game"].includes(seg.kind)){   // everything under the title goes in one box that can shrink to fit above the captions
+      const main = document.createElement("div"); main.className = "sc-main";
+      [...el.children].filter(c => !c.classList.contains("title")).forEach(c => main.appendChild(c)); el.appendChild(main); }
     const sc = { el, seg, gp: [], spots: [] };
     if(seg.kind === "game") sc.gp = gamePhases(el, seg);
-    else if(seg.kind !== "open" && seg.kind !== "close"){ sc.spots = [...el.querySelectorAll(".grid > .card, .grid > .mu, .rk > .rr, .pw > .pc, .stars > .star")]; sc.spots.forEach(x => x.classList.add("spot")); }
+    else if(seg.kind !== "open" && seg.kind !== "close"){ sc.spots = [...el.querySelectorAll(".grid > .card, .grid > .mu, .rk > .rr, .pw > .pc, .stars > .star, .pgc > .pr4")]; sc.spots.forEach(x => x.classList.add("spot")); }
     SCENES.push(sc); buildCaps(seg); });
   document.querySelectorAll("[data-a]").forEach(e => { const [k, d, u] = e.dataset.a.split(",");
     Object.assign(e.style, { animationName: k, animationDuration: u + "s", animationDelay: d + "s", animationTimingFunction: "cubic-bezier(.2,.8,.2,1)" }); });
   await document.fonts.ready;
   await Promise.all([...document.images].map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; })));
   await Promise.all([...document.images].map(im => im.decode ? im.decode().catch(() => {}) : 0));
+  fitScenes();
   document.getAnimations().forEach(a => a.pause());
   seek(0);
   return { scenes: SCENES.length, images: document.images.length };
@@ -339,19 +395,34 @@ function gamePhases(el, seg){
 }
 
 /* ===== the clock: put every element exactly where it belongs at time t ===== */
+const WIPE = .9;   // seconds the wipe is on screen, centered on each cut
+function wipeAt(t){
+  const el = document.getElementById("wipe"), b = SHOW.timeline.slice(1).map(s => s.start).find(x => Math.abs(t - x) <= WIPE / 2);
+  if(b === undefined){ el.style.visibility = "hidden"; return; }
+  const u = (t - b) / (WIPE / 2);   // -1 → 0 (covered) → 1
+  const ease = x => 1 - Math.pow(1 - x, 3), hold = .18, cover = -490;   // the panel fully covers the frame around x = -490
+  let x;
+  if(u < -hold) x = 2200 + (cover - 2200) * ease((u + 1) / (1 - hold));
+  else if(u <= hold) x = cover - 60 * (u + hold) / (2 * hold);
+  else x = cover - 60 + (-3400 - cover + 60) * Math.pow((u - hold) / (1 - hold), 2.2);
+  el.style.visibility = "visible";
+  el.querySelector(".wp").style.left = x + "px";
+  const wl = el.querySelector(".wl"); wl.style.opacity = Math.max(0, 1 - Math.abs(u) / .55).toFixed(3); wl.style.scale = (.8 + .2 * Math.max(0, 1 - Math.abs(u))).toFixed(3);
+}
 function seek(t){
-  const FADE = .4;
+  const FADE = .06;   // hard cut under the wipe
   SCENES.forEach(({ el, seg, gp, spots }) => {
     const local = t - seg.start, on = local >= -FADE && local <= seg.dur + FADE;
     let o = 0; if(on){ o = Math.min(1, (local + FADE) / FADE, (seg.dur + FADE - local) / FADE); o = Math.max(0, Math.min(1, o)); }
     el.style.opacity = o.toFixed(3); el.style.visibility = o > 0 ? "visible" : "hidden";
     if(on) el.getAnimations({ subtree: true }).forEach(a => { a.pause(); a.currentTime = Math.max(0, local) * 1000; });
     if(!on) return;
-    const PF = .35;
+    const PF = .45;
     gp.forEach(({ el: pe, iv }) => {   // each phase fades in, replays its entrance from its own start, fades out
       const cur = iv.find(([a, b]) => t >= a - PF / 2 && t <= b + PF / 2);
       const po = cur ? Math.max(0, Math.min(1, (t - cur[0] + PF / 2) / PF, (cur[1] + PF / 2 - t) / PF)) : 0;
       pe.style.opacity = po.toFixed(3); pe.style.visibility = po > 0 ? "visible" : "hidden";
+      if(cur && !pe.classList.contains("gp-clip")){ const sl = (1 - po) * 90 * (t < (cur[0] + cur[1]) / 2 ? 1 : -1); pe.style.translate = sl.toFixed(1) + "px 0"; }   // panels slide in from the right and out to the left
       if(cur) pe.getAnimations({ subtree: true }).forEach(a => { a.pause(); a.currentTime = Math.max(0, t - cur[0]) * 1000; });
     });
     if(spots.length > 1){   // spotlight: one card at a time, eased, across the segment
@@ -360,9 +431,33 @@ function seek(t){
     }
     if(seg.kind !== "game") el.style.scale = (1 + .025 * Math.max(0, Math.min(1, local / seg.dur))).toFixed(4);   // slow push-in (game scenes stay still so clips line up)
   });
+  wipeAt(t);
+  const art = Math.max(0, ...SCENES.filter(x => x.seg.kind === "open" || x.seg.kind === "close").map(x => Number(x.el.style.opacity) || 0));
+  document.querySelectorAll(".bug,.live,.ticker").forEach(e => { e.style.opacity = (1 - art).toFixed(3); });
+  document.getElementById("cap").style.bottom = art > .5 ? "150px" : "";   // over the show art: sit above the host name plates
   document.querySelectorAll(".g-anim").forEach(e => e.getAnimations().forEach(a => { a.pause(); a.currentTime = t * 1000; }));
   const c = CAPS.find(x => t >= x.s && t < x.e), cap = document.getElementById("cap"), key = c ? c.who + "|" + c.text : "";
-  if(cap.dataset.k !== key){ cap.dataset.k = key; cap.innerHTML = c ? (c.who ? `<i class="who ${c.who === "AVA" ? "b" : "a"}">${esc(c.who)}</i>` : "") + esc(c.text) : ""; }
+  if(cap.dataset.k !== key){ cap.dataset.k = key; cap.innerHTML = c ? (c.who ? `<i class="who ${c.who === ((SHOW.hosts || [])[1] || "NIA") ? "b" : "a"}">${esc(c.who)}</i>` : "") + esc(c.text) : ""; }
+}
+/* Keep every list clear of the captions and the ticker: if a scene's content runs past the safe line, the whole block
+   under the title shrinks (top-centred) until it fits. Measured with animations off so entrance moves don't skew it. */
+const SAFE_BOTTOM = 905;   // captions are one line now: they start around y 925
+function fitScenes(){
+  const st = document.createElement("style"); st.textContent = "*{animation:none!important;transition:none!important}"; document.head.appendChild(st);
+  SCENES.forEach(({ el }) => {
+    const main = el.querySelector(":scope > .sc-main"); if(!main) return;
+    const vis = el.style.visibility; el.style.visibility = "hidden"; el.style.scale = "1"; main.style.scale = "1";
+    const kids = [...main.querySelectorAll("*")].filter(x => x.offsetParent !== null || getComputedStyle(x).position === "absolute");
+    if(!kids.length){ el.style.visibility = vis; return; }
+    const rs = kids.map(x => x.getBoundingClientRect()).filter(r => r.height > 0);
+    const top = Math.min(...rs.map(r => r.top)), bottom = Math.max(...rs.map(r => r.bottom));
+    if(bottom > SAFE_BOTTOM && bottom > top){
+      const k = Math.max(.55, (SAFE_BOTTOM - top) / (bottom - top));
+      main.style.transformOrigin = `50% ${top}px`; main.style.scale = k.toFixed(4);
+    } else main.style.scale = "";
+    el.style.visibility = vis;
+  });
+  st.remove();
 }
 window.init = init; window.seek = seek;
 </script>
